@@ -1,0 +1,343 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            비밀번호 찾기
+        </title>
+        <style>
+            * {
+                margin: 0px;
+                box-sizing: border-box;
+                font-size: 11px;
+            }
+
+            html {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+
+            body {
+                width: 45%;
+                border: 1px solid black;
+            }
+
+            input{
+                border: 1px solid black;
+                border-radius: 3px;
+                line-height: 35px;
+                font-size: 12px;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+
+            .wrapper {
+                padding: 10px;
+            }
+
+            div {
+                padding-top: 3px;
+                padding-bottom: 8px;
+            }
+
+            .title {
+                text-align: center;
+                font-weight: 700;
+            }
+
+            .identifier input {
+                width: 100%;
+            }
+
+            .name input {
+                width: 100%;
+            }
+
+            .password input {
+                width: 100%;
+            }
+
+            .passwordCheck input {
+                width: 100%;
+            }
+
+            .phone {
+                display: flex;
+                justify-content: space-between;
+                line-height: 35px;
+            }
+
+            #phone1 {
+                width: 18%;
+            }
+
+            #phone2 {
+                width: 30%;
+            }
+
+            #phone3 {
+                width: 30%;
+            }
+
+            .auth {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .timer {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .auth div {
+                width: 30%;
+                text-align: center;
+                font-weight: 700;
+                font-size: 15px;
+            }
+
+            .auth button {
+                width: 70%;
+            }
+
+            .timer div {
+                width: 30%;
+                text-align: center;
+                font-weight: 700;
+                font-size: 15px;
+            }
+
+            .timer button {
+                width: 70%;
+            }
+
+            .area select {
+                width: 100%;
+                height: 40px;
+            }
+
+            .gender {
+                text-align: center;
+            }
+
+            .reset button {
+                width: 100%;
+                cursor:pointer;
+            }
+
+            button{
+                cursor: pointer;
+                height: 30px;
+            }
+
+            .error{
+                font-size: 1px;
+                height: 20px;
+                color:red;
+                font-weight: 700;
+            }
+        </style>
+        <script src="https://code.jquery.com/jquery-latest.js"></script>
+    </head>
+    <body>
+        <table>
+            <div class="wrapper">
+                <div class="title"><h1 style="font-size: 21px;">비밀번호 찾기</h1></div>
+                <div class="identifier">
+                    <input id="identifier" type="text" placeholder="ID을 입력해 주세요.(식별자는 ',' 구분해서 입력해주세요.)">
+                    <div id="identifierError" class="error"></div>
+                </div>
+                <div class="password">
+                    <input id="password" type="password" placeholder="바꾸실 비밀번호를 입력하세요.">
+                    <div id="passwordError" class="error"></div>
+                </div>
+                <div class="phone">
+                    <input id="phone1" type="text" size="1" maxlength="3" oninput="changePhone1()">
+                    <input id="phone2" type="text" size="3" maxlength="4" oninput="changePhone2()">
+                    <input id="phone3" type="text" size="3" maxlength="4" oninput="changePhone3()">
+                </div>
+                <div class="auth">
+                    <input id="certificationNumber" value="">
+                    <button disabled id="checkNumber">인증번호 전송</button>
+                </div>
+    
+                <div class="timer">
+                    <div id="timeLimit">03:00</div>
+                    <button disabled id="checkButton">인증확인</button>
+                </div>
+    
+                <div class="line">
+                    <hr>
+                </div>
+                <div class="reset">
+                    <button id="resetPassword" disabled onclick="restPassword()">변경하기</button>
+                </div>
+            </div>
+        </table>
+    </body>
+</html>
+<script>
+
+    let userId = null;
+
+    $("#checkNumber").on("click", function () {
+        $.ajax({
+            type: 'POST',
+            url: '/lookup',
+            dataType : 'json',
+            data : {identifier : $('#identifier').val(), cellNumber: $('#phone1').val()+$('#phone2').val()+$('#phone3').val()},
+            success: function(data) {
+                userId = data.userId;
+                getToken();
+            },
+            error:function(data){
+                alert(data.responseJSON.message);
+            }
+        });
+    });
+
+    $("#checkButton").on("click", function () {
+
+        if($('#certificationNumber').val() !== ''){
+            $.ajax({
+                type: 'POST',
+                url: '/sms/checkNumber',
+                dataType : 'json',
+                data : {codeNumber: $('#certificationNumber').val(), cellNumber: $('#phone1').val()+$('#phone2').val()+$('#phone3').val()},
+                success: function(data) {
+                    if(data.success === true) {
+                        alert("문자 인증이 완료되었습니다.");
+                        initButton();
+                        $("#checkButton").html("인증완료");
+                        $("#resetPassword").attr('disabled', false);
+                        $("#resetPassword").attr("style","background-color:yellow;");
+                    }
+                },
+                error:function(data){
+                    alert(data.responseJSON.message);
+                }
+            });
+        } else {
+            alert('인증번호를 입력하세요.');
+            return;
+        }
+    });
+
+    // 휴대폰 번호 입력 부분
+    function changePhone1(){
+        const phone1 = $("#phone1").val();
+        if(phone1.length === 3){
+            $("#phone2").focus();
+        }
+    }
+
+    function changePhone2(){
+        const phone2 = $("#phone2").val();
+        if(phone2.length === 4){
+            $("#phone3").focus();
+        }
+    }
+    function changePhone3(){
+        const phone3 = $("#phone3").val();
+
+        if(phone3.length === 4){
+            $("#checkNumber").focus();
+            $("#checkNumber").attr("style","background-color:yellow;");
+            $("#checkNumber").attr("disabled", false);
+        }
+    }
+
+    // 문자인증+타이머 부분
+    function initButton(){
+        $("#checkNumber").attr("disabled", true);
+        $("#checkButton").attr("disabled", true);
+        $("#timeLimit").html( "03:00");
+        $("#checkNumber").attr("style","background-color:none;")
+        $("#checkButton").attr("style","background-color:none;")
+    }
+
+    let processID = -1;
+
+    const getToken = () => {
+
+        $("#checkButton").attr("style","background-color:yellow;");
+        $("#checkButton").attr("disabled",false);
+
+        if (processID != -1) clearInterval(processID);
+
+        const token = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
+        let time = 180;
+
+        processID = setInterval(function () {
+            if (time < 0 || $("#checkNumber").disabled) {
+                clearInterval(processID);
+                initButton();
+                return;
+            }
+            let mm = String(Math.floor(time / 60)).padStart(2, "0");
+            let ss = String(time % 60).padStart(2, "0");
+            let result = mm + ":" + ss;
+            $("#timeLimit").text(result);
+            time--;
+        }, 1000);
+    };
+
+    function checkCompletion(){
+        alert("문자 인증이 완료되었습니다.");
+        initButton();
+        $("#completion").html("인증완료");
+        $("#resetPassword").attr('disabled',false);
+        $("#resetPassword").attr("style","background-color:yellow;");
+    }
+
+    function restPassword(){
+
+        let identifier = $("#identifier").val();
+        let password = $("#password").val();
+    
+        let check = true;
+
+        // 이메일확인
+        if($('#identifier').val() === ''){
+            $("#identifierError").html("이메일이 올바르지 않습니다.");
+            check = false;
+        }
+
+        if(password === ""){
+            $("#passwordError").html("비밀번호를 입력해주세요.");
+            check = false;
+        }
+        
+        if(check){
+            $("#identifierError").html("");
+
+            if($('#certificationNumber').val() !== '' && $('#certificationNumber').val() && $('#certificationNumber').val() &&
+                $('#phone1').val() !== '' && $('#phone2').val() !== '' && $('#phone3').val() !== ''){
+                $.ajax({
+                    type: 'PUT',
+                    url: '/reset/password',
+                    dataType : 'json',
+                    data : {password: $('#password').val(), id: userId},
+                    success: function(data) {
+                        if(data.success === true) {
+                            setCookie('Authorization', data.token);
+                            window.location = '/login';
+                        }
+                    },
+                    error:function(data){
+                        alert(data.responseJSON.message);
+                    }
+                });
+            }
+        }
+    }
+
+    function setCookie(name, value, exp) {
+        const date = new Date();
+        date.setTime(date.getTime() + exp*24*60*60*1000);
+        document.cookie = name + '=' + value + ';expires=' + date.toUTCString() + ';path=/';
+    }
+</script>

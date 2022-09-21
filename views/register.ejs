@@ -1,0 +1,459 @@
+<html lang="en">
+    <head>
+        <title>회원가입 페이지</title>
+        <style>
+            * {
+                margin: 0px;
+                box-sizing: border-box;
+                font-size: 11px;
+            }
+
+            html {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+
+            body {
+                width: 45%;
+                border: 1px solid black;
+            }
+
+            input{
+                border: 1px solid black;
+                border-radius: 3px;
+                line-height: 35px;
+                font-size: 12px;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+
+            .wrapper {
+                padding: 10px;
+            }
+
+            div {
+                padding-top: 3px;
+                padding-bottom: 8px;
+            }
+
+            .title {
+                text-align: center;
+                font-weight: 700;
+            }
+
+            .email input {
+                width: 100%;
+            }
+
+            .name input {
+                width: 100%;
+            }
+
+            .password input {
+                width: 100%;
+            }
+
+            .passwordCheck input {
+                width: 100%;
+            }
+
+            .phone {
+                display: flex;
+                justify-content: space-between;
+                line-height: 35px;
+            }
+
+            #phone1 {
+                width: 18%;
+            }
+
+            #phone2 {
+                width: 30%;
+            }
+
+            #phone3 {
+                width: 30%;
+            }
+
+            .auth {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .timer {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .auth div {
+                width: 30%;
+                text-align: center;
+                font-weight: 700;
+                font-size: 15px;
+            }
+
+            .auth button {
+                width: 70%;
+            }
+
+            .timer div {
+                width: 30%;
+                text-align: center;
+                font-weight: 700;
+                font-size: 15px;
+            }
+
+            .timer button {
+                width: 70%;
+            }
+
+            .area select {
+                width: 100%;
+                height: 40px;
+            }
+
+            .gender {
+                text-align: center;
+            }
+
+            .signUp button {
+                width: 100%;
+                cursor:pointer;
+            }
+
+            button{
+                cursor: pointer;
+                height: 30px;
+            }
+
+            .error{
+                font-size: 1px;
+                height: 20px;
+                color:red;
+                font-weight: 700;
+            }
+            .title {
+                text-align: center;
+                font-weight: 700;
+            }
+        </style>
+        <script src="https://code.jquery.com/jquery-latest.js"></script>
+    </head>
+
+    <body>
+        <div class="wrapper">
+            <div class="title"><h1 style="font-size: 21px;">회원가입</h1></div>
+            <div class="email">
+                <input id="email" type="text" placeholder="이메일을 입력해 주세요.">
+                <div id="emailError" class="error"></div>
+            </div>
+            <div class="name">
+                <input id="name"  type="text" placeholder="이름을 입력해 주세요.">
+                <div id="nameError" class="error"></div>
+            </div>
+            <div class="name">
+                <input id="nickname"  type="text" placeholder="닉네임을 입력해 주세요.">
+                <div id="nicknameError" class="error"></div>
+            </div>
+            <div class="password">
+                <input id="password" type="password" placeholder="비밀번호를 입력해 주세요.">
+                <div id="passwordError" class="error"></div>
+            </div>
+            <div class="passwordCheck">
+                <input id="passwordCheck" type="password" placeholder="비밀번호를 다시 입력해 주세요.">
+                <div id="passwordCheckError" class="error"></div>
+            </div>
+            <div class="phone">
+                <input id="phone1" type="text" size="1" maxlength="3" oninput="changePhone1()">
+                <input id="phone2" type="text" size="3" maxlength="4" oninput="changePhone2()">
+                <input id="phone3" type="text" size="3" maxlength="4" oninput="changePhone3()">
+            </div>
+            <div id="cellnumberCheckError" class="error"></div>
+            <div class="auth">
+                <input id="certificationNumber" value="">
+                <button disabled id="checkNumber">인증번호 전송</button>
+            </div>
+
+            <div class="timer">
+                <div id="timeLimit">03:00</div>
+                <button disabled id="checkButton">인증확인</button>
+            </div>
+
+            <div class="line">
+                <hr>
+            </div>
+            <div class="signUp">
+                <button id="signUpButton" disabled onclick="signUpCheck()">가입하기</button>
+            </div>
+        </div>
+    </body>
+</html>
+<script>
+
+    $("#email").on("keydown", function (e){
+        validCheck('email', $("#email").val());
+    });
+
+    $("#nickname").on("keydown", function (e){
+        validCheck('nickname', $("#nickname").val());
+    });
+
+    $("#checkNumber").on("click", function () {
+        getToken();
+
+        $.ajax({
+            type: 'POST',
+            url: '/sms/send',
+            dataType : 'json',
+            data : {cellNumber: $('#phone1').val()+$('#phone2').val()+$('#phone3').val()},
+            success: function(data) {
+                console.log(data);
+            },
+            error: function(data){
+                alert(data.responseJSON.message);
+            }
+        });
+    });
+
+    $("#checkButton").on("click", function () {
+
+        if($('#certificationNumber').val() !== ''){
+            $.ajax({
+                type: 'POST',
+                url: '/sms/checkNumber',
+                dataType : 'json',
+                data : {codeNumber: $('#certificationNumber').val(), cellNumber: $('#phone1').val()+$('#phone2').val()+$('#phone3').val()},
+                success: function(data) {
+                    if(data.success === true) {
+                        alert("문자 인증이 완료되었습니다.");
+                        initButton();
+                        $("#checkButton").html("인증완료");
+                        $("#signUpButton").attr('disabled', false);
+                        $("#signUpButton").attr("style","background-color:yellow;");
+                    }
+                },
+                error: function(data){
+                    alert(data.responseJSON.message);
+                }
+            });
+        } else {
+            alert('인증번호를 입력하세요.');
+            return;
+        }
+    });
+
+    function validCheck(type, value) {
+        $.ajax({
+            type: 'GET',
+            url: '/valid/identifier?identifier='+ value,
+            success: function(data) {
+                if(data.success === true) {
+                    if(type === 'email') {
+                        $('#emailError').html("사용가능한 이메일 입니다.");   
+                    } else if (type === 'nickname') {
+                        $('#nicknameError').html("사용가능한 닉네임 입니다.");   
+                    } else {
+                        $('#cellnumberCheckError').html("사용가능한 핸드폰번호 입니다.");   
+                        $("#checkNumber").focus();
+                        $("#checkNumber").attr("style","background-color:yellow;");
+                        $("#checkNumber").attr("disabled", false);
+                    }
+                }
+            },
+            error: function(data){
+                if(type === 'email') {
+                    $('#emailError').html("이미 등록된 이메일 입니다.");   
+                } else if (type === 'nickname') {
+                    $('#nicknameError').html("이미 등록된 닉네임 입니다.");   
+                } else {
+                    $('#cellnumberCheckError').html("이미 등록된 핸드폰번호 입니다.");
+                    $('#phone1').val('');
+                    $('#phone2').val('');
+                    $('#phone3').val('');
+                }
+            }
+        });
+    };
+
+    // 휴대폰 번호 입력 부분
+    function changePhone1(){
+        const phone1 = $("#phone1").val();
+        if(phone1.length === 3){
+            $("#phone2").focus();
+        }
+    };
+
+    function changePhone2(){
+        const phone2 = $("#phone2").val();
+        if(phone2.length === 4){
+            $("#phone3").focus();
+        }
+    };
+
+    function changePhone3(){
+        const phone3 = $("#phone3").val();
+
+        if(phone3.length === 4){
+            if($("#phone1").val() !== '' && $("#phone1").val() !== '' && $("#phone1").val() !== '') {
+                const cellnumber = $("#phone1").val() + $("#phone2").val() + $("#phone3").val();
+
+                validCheck('cellnumber', cellnumber);
+            } else {
+                alert('핸드폰 번호를 입력해주세요.');
+                return;
+            }
+        }
+    };
+
+    // 문자인증+타이머 부분
+    function initButton(){
+        $("#checkNumber").attr("disabled", true);
+        $("#checkButton").attr("disabled", true);
+        $("#certificationNumber").val('');
+        $("#timeLimit").html( "03:00");
+        $("#checkNumber").attr("style","background-color:none;")
+        $("#checkButton").attr("style","background-color:none;")
+    };
+
+    let processID = -1;
+
+    function getToken() {
+
+        $("#checkButton").attr("style","background-color:yellow;");
+        $("#checkButton").attr("disabled",false);
+
+        if (processID != -1) clearInterval(processID);
+
+        const token = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
+        let time = 180;
+
+        processID = setInterval(function () {
+            if (time < 0 || $("#checkNumber").disabled) {
+                clearInterval(processID);
+                initButton();
+                return;
+            }
+            let mm = String(Math.floor(time / 60)).padStart(2, "0");
+            let ss = String(time % 60).padStart(2, "0");
+            let result = mm + ":" + ss;
+            $("#timeLimit").text(result);
+            time--;
+        }, 1000);
+    };
+
+    function checkCompletion(){
+        alert("문자 인증이 완료되었습니다.");
+        initButton();
+        $("#completion").html("인증완료");
+        $("#signUpButton").attr('disabled',false);
+        $("#signUpButton").attr("style","background-color:yellow;");
+    };
+
+    function signUpCheck(){
+
+        let email = $("#email").val();
+        let name = $("#name").val();
+        let nickname = $("#nickname").val();
+        let password = $("#password").val();
+        let passwordCheck = $("#passwordCheck").val();
+    
+        let check = true;
+
+        // 이메일확인
+        if(email.includes('@')){
+            let emailId = email.split('@')[0];
+            let emailServer = email.split('@')[1];
+            if(emailId === "" || emailServer === ""){
+                $("#emailError").html("이메일이 올바르지 않습니다.");
+                check = false;
+            } else{
+                $("#emailError").html("");
+            }
+        }else{
+            $("#emailError").html("이메일이 올바르지 않습니다.");
+            check = false;
+        }
+
+        // 이름확인
+        if(name === ""){
+            $("#nameError").html("이름이 올바르지 않습니다.");
+            check = false;
+        }else{
+            $("#nameError").html("");
+        }
+
+        if(nickname === ""){
+            $("#nicknameError").html("닉네임이 올바르지 않습니다.");
+            check = false;
+        }else{
+            $("#nicknameError").html("");
+        }
+
+        // 비밀번호 확인
+        if(password !== passwordCheck){
+            $("#passwordError").html("");
+            $("#passwordCheckError").html("비밀번호가 동일하지 않습니다.");
+            check = false;
+        }else{
+            $("#passwordError").html("");
+            $("#passwordCheckError").html("");
+        }
+
+        if(password===""){
+            $("#passwordError").html("비밀번호를 입력해주세요.");
+            check = false;
+        }else{
+            //$("#passwordError").html("")
+        }
+
+        if(passwordCheck===""){
+            $("#passwordCheckError").html("비밀번호를 다시 입력해주세요.");
+            check = false;
+        }else{
+            //$("#passwordCheckError").html("")
+        }
+        
+        if(check){
+            const cellnumber = $("#phone1").val() + $("#phone2").val() + $("#phone3").val();
+
+            $("#emailError").html("");
+            $("#nameError").html("");
+            $("#passwordError").html("");
+            $("#passwordCheckError").html("");
+            $("#nicknameError").html("");
+
+            validCheck('email', $("#email").val());
+            validCheck('nickname', $("#nickname").val());
+            validCheck('cellnumber', cellnumber);
+
+            $.ajax({
+                type: 'POST',
+                url: '/join',
+                dataType: 'json',
+                data : {email: $('#email').val(), 
+                        password: $('#password').val(),
+                        name: $('#name').val(),
+                        nickname: $('#nickname').val(),
+                        cellNumber: $('#phone1').val() + $('#phone2').val() + $('#phone3').val()
+                },
+                success: function(data) {
+                    setCookie('Authorization', data.token);
+                    window.location = '/';
+                },
+                error: function(data){
+                    alert(data.responseJSON.message);
+                }
+            });
+        }
+    };
+
+    function setCookie(name, value, exp) {
+        const date = new Date();
+        date.setTime(date.getTime() + exp*24*60*60*1000);
+        document.cookie = name + '=' + value + ';expires=' + date.toUTCString() + ';path=/';
+    };
+</script>

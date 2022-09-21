@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            유저정보
+        </title>
+        <style>
+            * {
+                margin: 0px;
+                box-sizing: border-box;
+                font-size: 11px;
+            }
+
+            html {
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                padding-top: 20px;
+                padding-bottom: 20px;
+            }
+
+            body {
+                width: 45%;
+                border: 1px solid black;
+            }
+
+            input{
+                border: 1px solid black;
+                border-radius: 3px;
+                line-height: 35px;
+                font-size: 12px;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+
+            .wrapper {
+                padding: 10px;
+            }
+
+            div {
+                padding-top: 3px;
+                padding-bottom: 8px;
+            }
+
+            .title {
+                text-align: center;
+                font-weight: 700;
+            }
+
+            .info input {
+                width: 100%;
+            }
+
+            .title {
+                text-align: center;
+                font-weight: 700;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="title"><h1 style="font-size: 21px;">내정보</h1></div>
+            <div class="info">
+                <input id="name" type="text" value=<%= userInfo[0].name %> disabled>
+            </div>
+            <div class="info">
+                <input id="nickname"  type="text" value=<%= userInfo[0].nickname %> disabled>
+            </div>
+            <div class="info">
+                <input id="cellnumber"  type="text" value=<%= userInfo[0].cellnumber %> disabled>
+            </div>
+            <div class="info">
+                <input id="email" type="text" value=<%= userInfo[0].email %> disabled>
+            </div>
+        </div>
+    </body>
+</html>

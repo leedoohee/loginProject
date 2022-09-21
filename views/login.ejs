@@ -1,0 +1,196 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        로그인
+    </title>
+    <style>
+        * {
+            margin: 0px;
+            box-sizing: border-box;
+            font-size: 11px;
+        }
+
+        html {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        body {
+            width: 45%;
+            border: 1px solid black;
+        }
+
+        input{
+            border: 1px solid black;
+            border-radius: 3px;
+            line-height: 35px;
+            font-size: 12px;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+
+        .wrapper {
+            padding: 10px;
+        }
+
+        div {
+            padding-top: 3px;
+            padding-bottom: 8px;
+        }
+
+        .title {
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .identifier input {
+            width: 100%;
+        }
+
+        .name input {
+            width: 100%;
+        }
+
+        .password input {
+            width: 100%;
+        }
+
+        .passwordCheck input {
+            width: 100%;
+        }
+
+        .phone {
+            display: flex;
+            justify-content: space-between;
+            line-height: 35px;
+        }
+
+        #phone1 {
+            width: 18%;
+        }
+
+        #phone2 {
+            width: 30%;
+        }
+
+        #phone3 {
+            width: 30%;
+        }
+
+        .auth {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .timer {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .auth div {
+            width: 30%;
+            text-align: center;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .auth button {
+            width: 70%;
+        }
+
+        .timer div {
+            width: 30%;
+            text-align: center;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .timer button {
+            width: 70%;
+        }
+
+        .area select {
+            width: 100%;
+            height: 40px;
+        }
+
+        .gender {
+            text-align: center;
+        }
+
+        .login button {
+            width: 100%;
+            cursor:pointer;
+        }
+
+        button{
+            cursor: pointer;
+            height: 30px;
+        }
+
+        .error{
+            font-size: 1px;
+            height: 20px;
+            color:red;
+            font-weight: 700;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-latest.js"></script>
+</head>
+    <body>
+        <div>
+            <div>
+                <div class="title"><h1 style="font-size: 21px;">로그인</h1></div>
+                <div class="identifier">
+                    <input id="identifier" type="text" placeholder="ID을 입력해 주세요.(식별자는 ',' 구분해서 입력해주세요.)">
+                    <div id="identifierError" class="error"></div>
+                </div>
+                <div>
+                    <div>
+                        <a href="/lookup">비밀번호 찾기</a>
+                        <a href="/register">회원가입</a>
+                    </div>
+                </div>
+                </div>
+                <div class="login">
+                    <button id= "loginButton">로그인</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+<script>
+    $("#loginButton").on("click", function () {
+        if($('#identifier').val() !== '') {
+            $.ajax({
+                type: 'POST',
+                url: '/login',
+                dataType: 'json',
+                data : {identifier: $('#identifier').val()},
+                success: function(data) {
+                    setCookie('Authorization', data.token, 7);
+                    window.location = '/';
+                },
+                error: function(data){
+                    alert(data.responseJSON.message);
+                }
+            });
+        } else {
+            console.log('아이디를 입력해주세요.');
+            return;
+        }
+    });
+
+    function setCookie(name, value, exp) {
+        const date = new Date();
+        date.setTime(date.getTime() + exp*24*60*60*1000);
+        document.cookie = name + '=' + value + ';expires=' + date.toUTCString() + ';path=/';
+    }
+
+</script>
