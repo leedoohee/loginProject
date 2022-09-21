@@ -18,7 +18,7 @@ function sendSMS (req, res) {
 
     const checkCode = Math.floor(Math.random() * (999999 - 100000)) + 100000;
   
-    redisDB.setEx(cellNumber, 300, checkCode.toString());
+    redisDB.setEx(cellNumber, 180, checkCode.toString());
     
     const sendDataInfo = smsBody(cellNumber, checkCode);
 

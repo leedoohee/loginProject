@@ -24,7 +24,7 @@ const redisInfo = {
     db : config.get('redis.db')
 };
 
-const mongodb = 'mongodb://localhost:27017/test';
+const mongodb = config.get('mongodb.url');
 
 const client = redisConnection(redisInfo);
 client.connect();

@@ -1,26 +1,29 @@
 {
     "postgresql": {
-        "host" : "localhost",
-        "user" : "loginuser",
-        "password": "1234",
-        "database": "logindb",
+        "host" : "",
+        "user" : "",
+        "password": "",
+        "database": "",
         "port": 5432
     },
+    "mongodb": {
+        "url" : ""
+    },
     "redis" : {
-        "host": "127.0.0.1",
-        "port": "6379",
+        "host": "",
+        "port": "",
         "db" : 16
     },
     "sms": {
-        "uri": "ncp:sms:kr:266915548400:login",
-        "secretKey": "r1703Un7cTai8ccVMbf5BAm46mQp02mQtLO12z6S",
-        "accessKey": "5qeLx6BLquSHanUGOn6r",
-        "type": "SMS",
-        "contentType": "COMM",
+        "uri": "",
+        "secretKey": "",
+        "accessKey": "",
+        "type": "",
+        "contentType": "",
         "countryCode" : {
             "KR": "82"
         },
-        "from" : "01057672806"
+        "from" : ""
     },
     "jwt": {
         "secretkey": "secret",
